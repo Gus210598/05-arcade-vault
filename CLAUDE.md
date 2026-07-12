@@ -8,14 +8,11 @@ This project pins `next@16.2.10` with `react@19.2.4`, which is **ahead of your t
 
 Known breaking change already surfaced: **`middleware.ts` is deprecated and renamed to `proxy.ts`**, with the exported function named `proxy` instead of `middleware` (see `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`). If a task involves request interception, use `proxy.ts`, not `middleware.ts`.
 
-## Commands
-
-- `npm run dev` — start the dev server
-- `npm run build` — production build
-- `npm run start` — run the production build
-- `npm run lint` — ESLint (flat config via `eslint.config.mjs`, `eslint-config-next` core-web-vitals + typescript rules)
-
 There is no test runner configured yet.
+
+## Skills
+
+Usa siempre /frontend-design para diseñar interfaz de usuario.
 
 ## Project state
 
