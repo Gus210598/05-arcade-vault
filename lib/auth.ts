@@ -4,6 +4,7 @@ export interface StoredUser {
 
 const USER_KEY = "av_user";
 const SCORES_KEY = "av_scores";
+const USER_EVENT = "av-user-change";
 
 export function getStoredUser(): StoredUser | null {
   if (typeof window === "undefined") return null;
@@ -21,6 +22,29 @@ export function setStoredUser(user: StoredUser | null): void {
   } else {
     localStorage.removeItem(USER_KEY);
   }
+  window.dispatchEvent(new Event(USER_EVENT));
+}
+
+// Snapshot en string crudo para usarlo con useSyncExternalStore: dos lecturas
+// con el mismo contenido son === (igualdad de valor entre primitivos string),
+// así que no dispara renders de más aunque getStoredUser cree un objeto nuevo cada vez.
+export function getStoredUserSnapshot(): string {
+  if (typeof window === "undefined") return "null";
+  return localStorage.getItem(USER_KEY) ?? "null";
+}
+
+export function getStoredUserServerSnapshot(): string {
+  return "null";
+}
+
+export function subscribeStoredUser(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  window.addEventListener(USER_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(USER_EVENT, callback);
+  };
 }
 
 export function saveScoreEntry(entry: {
