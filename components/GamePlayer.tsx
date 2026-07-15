@@ -17,9 +17,10 @@ export default function GamePlayer({ game }: { game: Game }) {
   const userJson = useSyncExternalStore(
     subscribeStoredUser,
     getStoredUserSnapshot,
-    getStoredUserServerSnapshot
+    getStoredUserServerSnapshot,
   );
-  const storedUser: StoredUser | null = userJson === "null" ? null : JSON.parse(userJson);
+  const storedUser: StoredUser | null =
+    userJson === "null" ? null : JSON.parse(userJson);
 
   const [score, setScore] = useState(0);
   const [lives] = useState(3);
@@ -77,7 +78,10 @@ export default function GamePlayer({ game }: { game: Game }) {
           <button className="btn magenta" onClick={endGame}>
             FIN
           </button>
-          <button className="btn ghost" onClick={() => router.push(`/juego/${game.id}`)}>
+          <button
+            className="btn ghost"
+            onClick={() => router.push(`/juego/${game.id}`)}
+          >
             SALIR
           </button>
         </div>
@@ -93,14 +97,22 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="player-ship" />
           </div>
           {paused && (
-            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
               <div>
                 <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
                   EN PAUSA
                 </div>
                 <div
                   className="mono"
-                  style={{ fontSize: 11, color: "var(--ink-dim)", marginTop: 10, letterSpacing: "0.16em" }}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
                 >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
@@ -110,9 +122,7 @@ export default function GamePlayer({ game }: { game: Game }) {
         </div>
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
-          <span>
-            {game.title} · CRT-83 · 60 HZ
-          </span>
+          <span>{game.title} · CRT-83 · 60 HZ</span>
           <span>CARGA · 1MB</span>
         </div>
       </div>
@@ -127,7 +137,9 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="input-row">
                 <input
                   value={name}
-                  onChange={(e) => setCustomName(e.target.value.toUpperCase().slice(0, 10))}
+                  onChange={(e) =>
+                    setCustomName(e.target.value.toUpperCase().slice(0, 10))
+                  }
                   placeholder="TUS INICIALES"
                 />
                 <button
@@ -147,7 +159,10 @@ export default function GamePlayer({ game }: { game: Game }) {
               <button className="btn" onClick={restart}>
                 JUGAR DE NUEVO
               </button>
-              <button className="btn magenta" onClick={() => router.push("/")}>
+              <button
+                className="btn magenta"
+                onClick={() => router.push("/juegos")}
+              >
                 VOLVER AL VAULT
               </button>
             </div>
