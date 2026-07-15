@@ -287,10 +287,10 @@ export default function Home() {
               ✦ CREAR CUENTA
             </Link>
           </div>
-          <div className="hero-scroll" aria-hidden="true">
-            <span>DESLIZA</span>
-            <span className="arrow">▼</span>
-          </div>
+        </div>
+        <div className="hero-scroll" aria-hidden="true">
+          <span>DESLIZA</span>
+          <span className="arrow">▼</span>
         </div>
       </section>
 
