@@ -22,8 +22,10 @@ export default function Nav() {
   );
   const user: StoredUser | null = userJson === "null" ? null : JSON.parse(userJson);
 
-  const isBibliotecaActive = pathname === "/" || pathname.startsWith("/juego");
+  const isHomeActive = pathname === "/";
+  const isBibliotecaActive = pathname === "/biblioteca" || pathname.startsWith("/juego");
   const isSalonActive = pathname === "/salon";
+  const isAboutActive = pathname === "/about";
   const isAuthActive = pathname === "/login";
 
   const close = () => setOpen(false);
@@ -42,11 +44,17 @@ export default function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link href="/" className={isBibliotecaActive ? "active" : ""}>
+          <Link href="/" className={isHomeActive ? "active" : ""}>
+            Inicio
+          </Link>
+          <Link href="/biblioteca" className={isBibliotecaActive ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/salon" className={isSalonActive ? "active" : ""}>
             Salón de la Fama
+          </Link>
+          <Link href="/about" className={isAboutActive ? "active" : ""}>
+            Acerca de
           </Link>
         </div>
         <div className="spacer" />
@@ -80,11 +88,17 @@ export default function Nav() {
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
           MENÚ
         </div>
-        <Link href="/" className={isBibliotecaActive ? "active" : ""} onClick={close}>
+        <Link href="/" className={isHomeActive ? "active" : ""} onClick={close}>
+          Inicio
+        </Link>
+        <Link href="/biblioteca" className={isBibliotecaActive ? "active" : ""} onClick={close}>
           Biblioteca
         </Link>
         <Link href="/salon" className={isSalonActive ? "active" : ""} onClick={close}>
           Salón de la Fama
+        </Link>
+        <Link href="/about" className={isAboutActive ? "active" : ""} onClick={close}>
+          Acerca de
         </Link>
         <Link href="/login" className={isAuthActive ? "active" : ""} onClick={close}>
           {user ? "Cuenta" : "Iniciar Sesión"}
