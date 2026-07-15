@@ -1,6 +1,6 @@
 # SPEC 02 — Navbar nuevo + landing Home
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** [[01-mvp-visual]]
 > **Date:** 2026-07-14
 > **Objective:** Implementar el nuevo navbar de `references/templates/home-about/nav.jsx` (links Inicio / Biblioteca / Salón de la Fama / Acerca de) junto con la nueva landing `/` portada de `home.jsx`, moviendo la Biblioteca actual a `/biblioteca`, sin implementar el contenido de la página Acerca de (el link queda apuntando a `/about`, que no existe y muestra el 404 estilizado ya presente en el proyecto).
