@@ -22,7 +22,7 @@ export default function NotFound() {
           en el tiempo.
         </p>
 
-        <Link className="btn lg" href="/" style={{ width: "100%" }}>
+        <Link className="btn lg" href="/biblioteca" style={{ width: "100%" }}>
           VOLVER AL VAULT
         </Link>
       </div>
