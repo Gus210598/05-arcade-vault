@@ -23,7 +23,6 @@ export default function Nav() {
   const user: StoredUser | null =
     userJson === "null" ? null : JSON.parse(userJson);
 
-  const isHomeActive = pathname === "/";
   const isBibliotecaActive =
     pathname === "/juegos" || pathname.startsWith("/juego");
   const isSalonActive = pathname === "/salon";
@@ -46,9 +45,6 @@ export default function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link href="/" className={isHomeActive ? "active" : ""}>
-            Inicio
-          </Link>
           <Link href="/juegos" className={isBibliotecaActive ? "active" : ""}>
             Biblioteca
           </Link>
@@ -93,9 +89,6 @@ export default function Nav() {
         >
           MENÚ
         </div>
-        <Link href="/" className={isHomeActive ? "active" : ""} onClick={close}>
-          Inicio
-        </Link>
         <Link
           href="/juegos"
           className={isBibliotecaActive ? "active" : ""}
