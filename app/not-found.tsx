@@ -18,7 +18,7 @@ export default function NotFound() {
               marginTop: 6,
             }}
           >
-            SEÑAL PERDIDA · CARTUCHO NO ENCONTRADO
+            SEÑAL PERDIDA · NO ENCONTRADO
           </div>
         </div>
 
