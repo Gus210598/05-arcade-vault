@@ -18,12 +18,14 @@ export default function Nav() {
   const userJson = useSyncExternalStore(
     subscribeStoredUser,
     getStoredUserSnapshot,
-    getStoredUserServerSnapshot
+    getStoredUserServerSnapshot,
   );
-  const user: StoredUser | null = userJson === "null" ? null : JSON.parse(userJson);
+  const user: StoredUser | null =
+    userJson === "null" ? null : JSON.parse(userJson);
 
   const isHomeActive = pathname === "/";
-  const isBibliotecaActive = pathname === "/biblioteca" || pathname.startsWith("/juego");
+  const isBibliotecaActive =
+    pathname === "/juegos" || pathname.startsWith("/juego");
   const isSalonActive = pathname === "/salon";
   const isAboutActive = pathname === "/about";
   const isAuthActive = pathname === "/login";
@@ -47,7 +49,7 @@ export default function Nav() {
           <Link href="/" className={isHomeActive ? "active" : ""}>
             Inicio
           </Link>
-          <Link href="/biblioteca" className={isBibliotecaActive ? "active" : ""}>
+          <Link href="/juegos" className={isBibliotecaActive ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/salon" className={isSalonActive ? "active" : ""}>
@@ -85,28 +87,51 @@ export default function Nav() {
         onClick={close}
       />
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
-        <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
+        <div
+          className="pixel neon-cyan"
+          style={{ fontSize: 11, marginBottom: 16 }}
+        >
           MENÚ
         </div>
         <Link href="/" className={isHomeActive ? "active" : ""} onClick={close}>
           Inicio
         </Link>
-        <Link href="/biblioteca" className={isBibliotecaActive ? "active" : ""} onClick={close}>
+        <Link
+          href="/juegos"
+          className={isBibliotecaActive ? "active" : ""}
+          onClick={close}
+        >
           Biblioteca
         </Link>
-        <Link href="/salon" className={isSalonActive ? "active" : ""} onClick={close}>
+        <Link
+          href="/salon"
+          className={isSalonActive ? "active" : ""}
+          onClick={close}
+        >
           Salón de la Fama
         </Link>
-        <Link href="/about" className={isAboutActive ? "active" : ""} onClick={close}>
+        <Link
+          href="/about"
+          className={isAboutActive ? "active" : ""}
+          onClick={close}
+        >
           Acerca de
         </Link>
-        <Link href="/login" className={isAuthActive ? "active" : ""} onClick={close}>
+        <Link
+          href="/login"
+          className={isAuthActive ? "active" : ""}
+          onClick={close}
+        >
           {user ? "Cuenta" : "Iniciar Sesión"}
         </Link>
         <div style={{ flex: 1 }} />
         <div
           className="pixel"
-          style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}
+          style={{
+            fontSize: 9,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.16em",
+          }}
         >
           CRÉDITOS · 03
         </div>

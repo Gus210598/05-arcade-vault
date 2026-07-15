@@ -37,7 +37,10 @@ export default async function GameDetailPage({
               <div className="l">Mejor global</div>
               <div
                 className="v"
-                style={{ color: "var(--magenta)", textShadow: "0 0 6px rgba(255,0,110,0.5)" }}
+                style={{
+                  color: "var(--magenta)",
+                  textShadow: "0 0 6px rgba(255,0,110,0.5)",
+                }}
               >
                 {game.best.toLocaleString("es-ES")}
               </div>
@@ -46,7 +49,10 @@ export default async function GameDetailPage({
               <div className="l">Dificultad</div>
               <div
                 className="v"
-                style={{ color: "var(--yellow)", textShadow: "0 0 6px rgba(245,255,0,0.5)" }}
+                style={{
+                  color: "var(--yellow)",
+                  textShadow: "0 0 6px rgba(245,255,0,0.5)",
+                }}
               >
                 ★ ★ ★ ☆ ☆
               </div>
@@ -56,7 +62,7 @@ export default async function GameDetailPage({
             <Link className="btn xl pulse" href={`/juego/${game.id}/jugar`}>
               ▶ JUGAR AHORA
             </Link>
-            <Link className="btn ghost lg" href="/biblioteca">
+            <Link className="btn ghost lg" href="/juegos">
               VOLVER AL VAULT
             </Link>
           </div>
@@ -69,12 +75,21 @@ export default async function GameDetailPage({
           {scores.map((r, i) => (
             <div
               key={r.name}
-              className={"lb-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")}
+              className={
+                "lb-row" +
+                (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+              }
             >
               <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
               <div className="pl">
                 {r.name}
-                <div style={{ fontSize: 10, color: "var(--ink-faint)", letterSpacing: "0.1em" }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: "var(--ink-faint)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
                   {r.date}
                 </div>
               </div>
