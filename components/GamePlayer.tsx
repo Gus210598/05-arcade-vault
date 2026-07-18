@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/games";
 import {
@@ -10,9 +10,14 @@ import {
   subscribeStoredUser,
   type StoredUser,
 } from "@/lib/auth";
+import AsteroidsGame, {
+  type AsteroidsGameHandle,
+} from "@/components/games/asteroids/AsteroidsGame";
+import type { AsteroidsState } from "@/components/games/asteroids/engine";
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
+  const isAsteroids = game.id === "asteroides";
 
   const userJson = useSyncExternalStore(
     subscribeStoredUser,
@@ -30,22 +35,48 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [customName, setCustomName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const [asteroidsState, setAsteroidsState] = useState<AsteroidsState>({
+    score: 0,
+    lives: 3,
+    level: 1,
+    phase: "playing",
+  });
+  const asteroidsRef = useRef<AsteroidsGameHandle>(null);
+
+  const displayScore = isAsteroids ? asteroidsState.score : score;
+  const displayLives = isAsteroids ? asteroidsState.lives : lives;
+  const displayLevel = isAsteroids ? asteroidsState.level : level;
+
   const name = customName ?? storedUser?.name ?? "INVITADO";
 
   useEffect(() => {
-    if (over || paused) return;
+    if (isAsteroids || over || paused) return;
     const t = setInterval(() => {
       setScore((s) => s + Math.floor(10 + Math.random() * 90));
     }, 220);
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isAsteroids, over, paused]);
 
-  const endGame = () => setOver(true);
+  const endGame = () => {
+    if (isAsteroids) asteroidsRef.current?.forceGameOver();
+    else setOver(true);
+  };
   const restart = () => {
-    setScore(0);
+    if (isAsteroids) asteroidsRef.current?.restart();
+    else setScore(0);
     setPaused(false);
     setOver(false);
     setSaved(false);
+  };
+  const togglePause = () => {
+    setPaused((p) => {
+      const next = !p;
+      if (isAsteroids) {
+        if (next) asteroidsRef.current?.pause();
+        else asteroidsRef.current?.resume();
+      }
+      return next;
+    });
   };
 
   return (
@@ -60,19 +91,19 @@ export default function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat">
             <div className="l">Puntuación</div>
-            <div className="v">{score.toLocaleString("es-ES")}</div>
+            <div className="v">{displayScore.toLocaleString("es-ES")}</div>
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            <div className="v">{"♥ ".repeat(displayLives).trim() || "—"}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
-            <div className="v">{String(level).padStart(2, "0")}</div>
+            <div className="v">{String(displayLevel).padStart(2, "0")}</div>
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          <button className="btn yellow" onClick={togglePause}>
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
           <button className="btn magenta" onClick={endGame}>
@@ -89,13 +120,21 @@ export default function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor" />
-            <div className="enemy e1" />
-            <div className="enemy e2" />
-            <div className="enemy e3" />
-            <div className="player-ship" />
-          </div>
+          {isAsteroids ? (
+            <AsteroidsGame
+              ref={asteroidsRef}
+              onStateChange={setAsteroidsState}
+              onGameOver={() => setOver(true)}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor" />
+              <div className="enemy e1" />
+              <div className="enemy e2" />
+              <div className="enemy e3" />
+              <div className="player-ship" />
+            </div>
+          )}
           {paused && (
             <div
               className="crt-content"
@@ -132,7 +171,7 @@ export default function GamePlayer({ game }: { game: Game }) {
           <div className="modal">
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
-            <div className="final">{score.toLocaleString("es-ES")}</div>
+            <div className="final">{displayScore.toLocaleString("es-ES")}</div>
             {!saved ? (
               <div className="input-row">
                 <input
@@ -145,7 +184,7 @@ export default function GamePlayer({ game }: { game: Game }) {
                 <button
                   className="btn yellow"
                   onClick={() => {
-                    saveScoreEntry({ game: game.id, score, name });
+                    saveScoreEntry({ game: game.id, score: displayScore, name });
                     setSaved(true);
                   }}
                 >
