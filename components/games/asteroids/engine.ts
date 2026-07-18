@@ -13,7 +13,7 @@ export interface AsteroidsState {
 export const CANVAS_W = 800;
 export const CANVAS_H = 600;
 
-// Paleta neón de Arcade Vault (mismos valores que las variables CSS --yellow/--cyan/--magenta/--green/--bg,
+// Paleta neón de Arcade Vault (mismos valores zque las variables CSS --yellow/--cyan/--magenta/--green/--bg,
 // duplicados aquí porque canvas no resuelve var(--x) en fillStyle/strokeStyle).
 const COLOR_BG = "#0a0a0f";
 const COLOR_YELLOW = "#f5ff00";
@@ -251,7 +251,8 @@ class Ship {
 
   draw(ctx: CanvasRenderingContext2D) {
     if (this.dead) return;
-    if (this.invincible > 0 && Math.floor(this.invincible * 8) % 2 === 0) return;
+    if (this.invincible > 0 && Math.floor(this.invincible * 8) % 2 === 0)
+      return;
 
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -343,7 +344,10 @@ export class AsteroidsEngine {
 
   private lastNotified: AsteroidsState | null = null;
 
-  constructor(ctx: CanvasRenderingContext2D, onStateChange: (state: AsteroidsState) => void) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    onStateChange: (state: AsteroidsState) => void,
+  ) {
     this.ctx = ctx;
     this.onStateChange = onStateChange;
     this.ship = new Ship(this.keys);
@@ -570,7 +574,8 @@ export class AsteroidsEngine {
     ctx.textAlign = "center";
     ctx.fillText(`NIVEL ${this.level}`, CANVAS_W / 2, 26);
 
-    for (let i = 0; i < this.lives; i++) this.drawLifeIcon(CANVAS_W - 16 - i * 22, 18);
+    for (let i = 0; i < this.lives; i++)
+      this.drawLifeIcon(CANVAS_W - 16 - i * 22, 18);
 
     if (this.ship.tripleShot > 0) {
       ctx.textAlign = "left";
