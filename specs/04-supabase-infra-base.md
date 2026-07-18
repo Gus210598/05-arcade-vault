@@ -1,6 +1,6 @@
 # SPEC 04 — Infraestructura base de Supabase
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** Ninguno
 > **Date:** 2026-07-18
 > **Objective:** Instalar y configurar la infraestructura base de Supabase (`@supabase/ssr`) en Arcade Vault — clientes de browser y de servidor, `proxy.ts` para refresco de sesión, y variables de entorno — sin conectar todavía autenticación real ni persistencia de datos (la auth falsa de `localStorage` y el mock del Salón de la Fama quedan intactos).
