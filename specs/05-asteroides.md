@@ -1,6 +1,6 @@
 # SPEC 05 — Asteroides (primer juego jugable real)
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** 01-mvp-visual (reproductor, GAMES, saveScoreEntry)
 > **Date:** 2026-07-18
 > **Objective:** Implementar el primer juego jugable real de Arcade Vault — Asteroides — portando la lógica de `references/started-games/02-asteroids/game.js` a un componente canvas de React aislado (`components/games/asteroids/`), reskineado con la paleta neón del sitio, integrado en `/juego/asteroides/jugar` con HUD dual (React + canvas) y controles reales de pausa/fin/reinicio, sin modificar los demás 7 juegos ni generalizar la arquitectura del reproductor.
