@@ -1,5 +1,4 @@
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 export interface ScoreRow {
   rank: number;
@@ -55,20 +54,4 @@ export async function getGameStats(
     best: Math.max(...data.map((row) => row.score)),
     plays: data.length,
   };
-}
-
-// Client-side (usa lib/supabase/client.ts) — llamado desde GamePlayer.tsx
-export async function saveScoreToSupabase(entry: {
-  gameId: string;
-  playerName: string;
-  score: number;
-}): Promise<void> {
-  const supabase = createBrowserClient();
-  const { error } = await supabase.from("scores").insert({
-    game_id: entry.gameId,
-    player_name: entry.playerName,
-    score: entry.score,
-  });
-
-  if (error) throw error;
 }

@@ -10,6 +10,7 @@ import {
   subscribeStoredUser,
   type StoredUser,
 } from "@/lib/auth";
+import { saveScoreToSupabase } from "@/lib/scores-client";
 import AsteroidsGame, {
   type AsteroidsGameHandle,
 } from "@/components/games/asteroids/AsteroidsGame";
@@ -183,8 +184,20 @@ export default function GamePlayer({ game }: { game: Game }) {
                 />
                 <button
                   className="btn yellow"
-                  onClick={() => {
-                    saveScoreEntry({ game: game.id, score: displayScore, name });
+                  onClick={async () => {
+                    if (isAsteroids) {
+                      try {
+                        await saveScoreToSupabase({
+                          gameId: game.id,
+                          playerName: name,
+                          score: displayScore,
+                        });
+                      } catch (err) {
+                        console.error("No se pudo guardar la puntuación", err);
+                      }
+                    } else {
+                      saveScoreEntry({ game: game.id, score: displayScore, name });
+                    }
                     setSaved(true);
                   }}
                 >
