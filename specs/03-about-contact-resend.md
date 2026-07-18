@@ -1,6 +1,6 @@
 # SPEC 03 — About page + envío de contacto vía Resend
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** [[02-navbar-home-landing]]
 > **Date:** 2026-07-17
 > **Objective:** Implementar `app/about/page.tsx` portando `references/templates/home-about/about.jsx` tal cual (hero, highlights, formulario de contacto), conectando el envío del formulario a un endpoint propio (`app/api/contact/route.ts`) que usa Resend para mandar un correo real a `gustavo.barahona.i@gmail.com` con los datos enviados.
