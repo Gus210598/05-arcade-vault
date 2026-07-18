@@ -1,6 +1,6 @@
 # SPEC 06 — Leaderboard real de Asteroides (Supabase)
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** 04-supabase-infra-base (clientes Supabase browser/server), 05-asteroides (juego real + `saveScoreEntry` + `GamePlayer.tsx`)
 > **Date:** 2026-07-18
 > **Objective:** Persistir en Supabase (tablas `games` y `scores`) las puntuaciones reales de Asteroides, reemplazando los datos simulados del Salón de la Fama y del panel "mejores puntuaciones" de `/juego/asteroides` por datos reales de partidas jugadas, sin tocar los demás 7 juegos ni migrar el catálogo visual completo de `lib/games.ts` a la base de datos.
