@@ -12,11 +12,10 @@ export default async function GameDetailPage({
   const game = GAMES.find((g) => g.id === id);
   if (!game) notFound();
 
-  const isAsteroids = id === "asteroides";
-  const scores = isAsteroids
-    ? await getTopScores("asteroides", 10)
+  const scores = game.hasRealBackend
+    ? await getTopScores(game.id, 10)
     : seededScores(id.length * 17 + 3, 10);
-  const realStats = isAsteroids ? await getGameStats("asteroides") : null;
+  const realStats = game.hasRealBackend ? await getGameStats(game.id) : null;
   const best = realStats ? realStats.best : game.best;
   const plays = realStats ? String(realStats.plays) : game.plays;
 

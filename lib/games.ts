@@ -8,6 +8,7 @@ export interface Game {
   color: "cyan" | "magenta" | "yellow" | "green";
   best: number;
   plays: string;
+  hasRealBackend?: boolean;
 }
 
 export const GAMES: Game[] = [
@@ -32,6 +33,7 @@ export const GAMES: Game[] = [
     color: "magenta",
     best: 184220,
     plays: "31.8K",
+    hasRealBackend: true,
   },
   {
     id: "serpentina",
@@ -76,6 +78,7 @@ export const GAMES: Game[] = [
     color: "yellow",
     best: 41200,
     plays: "15.6K",
+    hasRealBackend: true,
   },
   {
     id: "ranaria",

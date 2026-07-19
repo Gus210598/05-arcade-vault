@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Game } from "@/lib/games";
 import {
@@ -15,10 +15,18 @@ import AsteroidsGame, {
   type AsteroidsGameHandle,
 } from "@/components/games/asteroids/AsteroidsGame";
 import type { AsteroidsState } from "@/components/games/asteroids/engine";
+import TetrisGame, {
+  type TetrisGameHandle,
+} from "@/components/games/tetris/TetrisGame";
+import { THEMES, type TetrisState, type ThemeId } from "@/components/games/tetris/engine";
+
+const TETRIS_THEME_KEY = "av_tetris_theme";
+const THEME_OPTIONS = Object.values(THEMES);
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
   const isAsteroids = game.id === "asteroides";
+  const isTetris = game.id === "tetris";
 
   const userJson = useSyncExternalStore(
     subscribeStoredUser,
@@ -44,40 +52,92 @@ export default function GamePlayer({ game }: { game: Game }) {
   });
   const asteroidsRef = useRef<AsteroidsGameHandle>(null);
 
-  const displayScore = isAsteroids ? asteroidsState.score : score;
+  const [tetrisState, setTetrisState] = useState<TetrisState>({
+    score: 0,
+    lines: 0,
+    level: 1,
+    phase: "playing",
+  });
+  const tetrisRef = useRef<TetrisGameHandle>(null);
+  const [tetrisTheme, setTetrisTheme] = useState<ThemeId>("retro");
+
+  const displayScore = isAsteroids
+    ? asteroidsState.score
+    : isTetris
+      ? tetrisState.score
+      : score;
   const displayLives = isAsteroids ? asteroidsState.lives : lives;
-  const displayLevel = isAsteroids ? asteroidsState.level : level;
+  const displayLevel = isAsteroids
+    ? asteroidsState.level
+    : isTetris
+      ? tetrisState.level
+      : level;
 
   const name = customName ?? storedUser?.name ?? "INVITADO";
 
   useEffect(() => {
-    if (isAsteroids || over || paused) return;
+    if (isAsteroids || isTetris || over || paused) return;
     const t = setInterval(() => {
       setScore((s) => s + Math.floor(10 + Math.random() * 90));
     }, 220);
     return () => clearInterval(t);
-  }, [isAsteroids, over, paused]);
+  }, [isAsteroids, isTetris, over, paused]);
+
+  // Al montar Tetris, retoma el tema guardado y lo aplica al engine real antes
+  // del primer frame (setTheme() se ejecuta en fase de efectos, antes de que
+  // el rAF del engine pinte, así que no hay parpadeo visible).
+  useEffect(() => {
+    if (!isTetris) return;
+    const stored = window.localStorage.getItem(TETRIS_THEME_KEY);
+    const initial: ThemeId = stored && stored in THEMES ? (stored as ThemeId) : "retro";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage no es legible en SSR; sync inicial inevitable, sin parpadeo (ver comentario arriba)
+    setTetrisTheme(initial);
+    tetrisRef.current?.setTheme(initial);
+  }, [isTetris]);
 
   const endGame = () => {
     if (isAsteroids) asteroidsRef.current?.forceGameOver();
+    else if (isTetris) tetrisRef.current?.forceGameOver();
     else setOver(true);
   };
   const restart = () => {
     if (isAsteroids) asteroidsRef.current?.restart();
+    else if (isTetris) tetrisRef.current?.restart();
     else setScore(0);
     setPaused(false);
     setOver(false);
     setSaved(false);
   };
-  const togglePause = () => {
+  const togglePause = useCallback(() => {
     setPaused((p) => {
       const next = !p;
       if (isAsteroids) {
         if (next) asteroidsRef.current?.pause();
         else asteroidsRef.current?.resume();
+      } else if (isTetris) {
+        if (next) tetrisRef.current?.pause();
+        else tetrisRef.current?.resume();
       }
       return next;
     });
+  }, [isAsteroids, isTetris]);
+
+  // KeyP reusa el mismo togglePause() del botón PAUSA, para que el label y el
+  // overlay "EN PAUSA" nunca queden desincronizados del engine real.
+  useEffect(() => {
+    if (!isTetris) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== "KeyP" || over) return;
+      togglePause();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isTetris, over, togglePause]);
+
+  const handleThemeChange = (id: ThemeId) => {
+    setTetrisTheme(id);
+    tetrisRef.current?.setTheme(id);
+    window.localStorage.setItem(TETRIS_THEME_KEY, id);
   };
 
   return (
@@ -94,14 +154,44 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{displayScore.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(displayLives).trim() || "—"}</div>
-          </div>
+          {isTetris ? (
+            <div className="hud-stat">
+              <div className="l">Líneas</div>
+              <div className="v">{tetrisState.lines}</div>
+            </div>
+          ) : (
+            <div className="hud-stat lives">
+              <div className="l">Vidas</div>
+              <div className="v">{"♥ ".repeat(displayLives).trim() || "—"}</div>
+            </div>
+          )}
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(displayLevel).padStart(2, "0")}</div>
           </div>
+          {isTetris && (
+            <div className="theme-picker">
+              <div className="l">Paleta</div>
+              <div className="theme-swatches">
+                {THEME_OPTIONS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={`theme-swatch${tetrisTheme === t.id ? " active" : ""}`}
+                    aria-pressed={tetrisTheme === t.id}
+                    onClick={() => handleThemeChange(t.id)}
+                  >
+                    <span className="swatch-icon" aria-hidden="true">
+                      <i style={{ background: t.colors[0] }} />
+                      <i style={{ background: t.colors[1] }} />
+                      <i style={{ background: t.colors[2] }} />
+                    </span>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="hud-actions">
           <button className="btn yellow" onClick={togglePause}>
@@ -126,6 +216,13 @@ export default function GamePlayer({ game }: { game: Game }) {
               ref={asteroidsRef}
               onStateChange={setAsteroidsState}
               onGameOver={() => setOver(true)}
+            />
+          ) : isTetris ? (
+            <TetrisGame
+              ref={tetrisRef}
+              onStateChange={setTetrisState}
+              onGameOver={() => setOver(true)}
+              initialTheme={tetrisTheme}
             />
           ) : (
             <div className="game-arena">
@@ -185,7 +282,7 @@ export default function GamePlayer({ game }: { game: Game }) {
                 <button
                   className="btn yellow"
                   onClick={async () => {
-                    if (isAsteroids) {
+                    if (game.hasRealBackend) {
                       try {
                         await saveScoreToSupabase({
                           gameId: game.id,

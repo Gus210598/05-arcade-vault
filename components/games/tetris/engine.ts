@@ -73,7 +73,7 @@ const PIECES: (Shape | null)[] = [
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
-export type ThemeId = "retro" | "neon-pastel" | "pixel-art";
+export type ThemeId = "retro" | "neon" | "pixel-art";
 
 export type BlockStyle = "flat-highlight" | "soft-glow" | "pixel-outline";
 
@@ -99,17 +99,17 @@ export const THEMES: Record<ThemeId, TetrisTheme> = {
     ],
     blockStyle: "flat-highlight",
   },
-  "neon-pastel": {
-    id: "neon-pastel",
-    label: "NEÓN PASTEL",
+  neon: {
+    id: "neon",
+    label: "NEÓN",
     colors: [
-      "#9fe8f5",
-      "#fff2a8",
-      "#e3b3e8",
-      "#b3f0c2",
-      "#f5b3c2",
-      "#b3d4f5",
-      "#f5cfa8",
+      "#00f5ff",
+      "#f5ff00",
+      "#ff006e",
+      "#00ff88",
+      "#ff3860",
+      "#4d7fff",
+      "#ff9100",
     ],
     blockStyle: "soft-glow",
   },
@@ -441,7 +441,7 @@ export class TetrisEngine {
     context.save();
     context.globalAlpha = alpha;
     context.shadowColor = color;
-    context.shadowBlur = 8;
+    context.shadowBlur = 12;
     context.fillStyle = color;
     context.beginPath();
     context.roundRect(x * size + 2, y * size + 2, size - 4, size - 4, 4);

@@ -146,7 +146,16 @@ const TetrisGame = forwardRef<TetrisGameHandle, TetrisGameProps>(
           ref={canvasRef}
           width={CANVAS_W}
           height={CANVAS_H}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            width: "auto",
+            height: "auto",
+          }}
         />
         <canvas
           ref={nextCanvasRef}
