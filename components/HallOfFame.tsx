@@ -11,9 +11,9 @@ import {
 } from "@/lib/auth";
 
 export default function HallOfFame({
-  asteroidsScores,
+  realScores,
 }: {
-  asteroidsScores: ScoreRow[];
+  realScores: Record<string, ScoreRow[]>;
 }) {
   const [tab, setTab] = useState(GAMES[0].id);
 
@@ -25,12 +25,14 @@ export default function HallOfFame({
   const user: StoredUser | null =
     userJson === "null" ? null : JSON.parse(userJson);
 
+  const game = GAMES.find((g) => g.id === tab)!;
   const rows = useMemo(
     () =>
-      tab === "asteroides" ? asteroidsScores : seededScores(tab.length * 23 + 7, 12),
-    [tab, asteroidsScores],
+      game.hasRealBackend
+        ? (realScores[tab] ?? [])
+        : seededScores(tab.length * 23 + 7, 12),
+    [tab, game.hasRealBackend, realScores],
   );
-  const game = GAMES.find((g) => g.id === tab)!;
   const youRank = user ? Math.floor(8 + (tab.length % 4)) : null;
   const youScore = user ? rows[5]?.score - 2400 : null;
 

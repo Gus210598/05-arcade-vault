@@ -8,6 +8,7 @@ export interface Game {
   color: "cyan" | "magenta" | "yellow" | "green";
   best: number;
   plays: string;
+  hasRealBackend?: boolean;
 }
 
 export const GAMES: Game[] = [
@@ -23,15 +24,16 @@ export const GAMES: Game[] = [
     plays: "12.4K",
   },
   {
-    id: "caida",
-    title: "CAÍDA",
+    id: "tetris",
+    title: "TETRIS",
     short: "Encaja las piezas antes de que el techo te aplaste.",
-    long: "Piezas geométricas descienden desde la oscuridad. Rótalas, encástralas y limpia líneas para sobrevivir. La velocidad aumenta sin piedad cada 10 líneas.",
+    long: "Tetrominós geométricos descienden desde la oscuridad. Rótalos, encástralos y limpia líneas para sobrevivir. La velocidad aumenta sin piedad cada 10 líneas.",
     cat: "PUZZLE",
-    cover: "cover-tetro",
+    cover: "cover-tetris",
     color: "magenta",
     best: 184220,
     plays: "31.8K",
+    hasRealBackend: true,
   },
   {
     id: "serpentina",
@@ -76,6 +78,7 @@ export const GAMES: Game[] = [
     color: "yellow",
     best: 41200,
     plays: "15.6K",
+    hasRealBackend: true,
   },
   {
     id: "ranaria",
