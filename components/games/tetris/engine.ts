@@ -69,11 +69,6 @@ const PIECES: (Shape | null)[] = [
     [7, 7, 7],
     [0, 0, 0],
   ], // L
-  // [
-  //   [8, 8, 8],
-  //   [8, 0, 8],
-  //   [8, 8, 8],
-  // ], // N (tuerca)
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -85,7 +80,7 @@ export type BlockStyle = "flat-highlight" | "soft-glow" | "pixel-outline";
 export interface TetrisTheme {
   id: ThemeId;
   label: string;
-  colors: [string, string, string, string, string, string, string, string]; // índices 1–8: I,O,T,S,Z,J,L,N
+  colors: [string, string, string, string, string, string, string]; // índices 1–7: I,O,T,S,Z,J,L
   blockStyle: BlockStyle;
 }
 
@@ -101,7 +96,6 @@ export const THEMES: Record<ThemeId, TetrisTheme> = {
       "#e57373",
       "#90caf9",
       "#ffb74d",
-      "#9e9e9e",
     ],
     blockStyle: "flat-highlight",
   },
@@ -116,7 +110,6 @@ export const THEMES: Record<ThemeId, TetrisTheme> = {
       "#f5b3c2",
       "#b3d4f5",
       "#f5cfa8",
-      "#d8d8e3",
     ],
     blockStyle: "soft-glow",
   },
@@ -131,7 +124,6 @@ export const THEMES: Record<ThemeId, TetrisTheme> = {
       "#ff1744",
       "#2979ff",
       "#ff9100",
-      "#616161",
     ],
     blockStyle: "pixel-outline",
   },
@@ -184,7 +176,7 @@ export class TetrisEngine {
   }
 
   private randomPiece(): Piece {
-    const type = Math.floor(Math.random() * 8) + 1;
+    const type = Math.floor(Math.random() * 7) + 1;
     const shape = PIECES[type]!.map((row) => [...row]);
     return {
       type,
@@ -340,8 +332,9 @@ export class TetrisEngine {
     this.notify();
   }
 
-  handleKeyUp(_code: string) {
+  handleKeyUp(code: string) {
     // no-op — Tetris no tiene input "mantenido", cada acción se resuelve en handleKeyDown
+    void code;
   }
 
   pause() {
