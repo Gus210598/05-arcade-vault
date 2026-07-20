@@ -1,4 +1,6 @@
-const EXPLOSION_FRAMES = {
+import spritesheetSrc from "./spritesheet-breakout.png";
+
+export const EXPLOSION_FRAMES = {
   red: [ { sx: 256, sy: 176, sw: 32, sh: 16 }, { sx: 288, sy: 176, sw: 32, sh: 16 }, { sx: 320, sy: 176, sw: 32, sh: 16 }, { sx: 352, sy: 176, sw: 32, sh: 16 } ],
   cyan: [ { sx: 256, sy: 192, sw: 32, sh: 16 }, { sx: 288, sy: 192, sw: 32, sh: 16 }, { sx: 320, sy: 192, sw: 32, sh: 16 }, { sx: 352, sy: 192, sw: 32, sh: 16 } ],
   green: [ { sx: 256, sy: 208, sw: 32, sh: 16 }, { sx: 288, sy: 208, sw: 32, sh: 16 }, { sx: 320, sy: 208, sw: 32, sh: 16 }, { sx: 352, sy: 208, sw: 32, sh: 16 } ],
@@ -8,9 +10,9 @@ const EXPLOSION_FRAMES = {
   gray: [ { sx: 256, sy: 176, sw: 32, sh: 16 }, { sx: 288, sy: 176, sw: 32, sh: 16 }, { sx: 320, sy: 176, sw: 32, sh: 16 }, { sx: 352, sy: 176, sw: 32, sh: 16 } ],
 };
 
-const EXPLOSION_DURATION = 150;
+export const EXPLOSION_DURATION = 150;
 
-const SPRITES = {
+export const SPRITES = {
   paddle: { sx: 32, sy: 112, sw: 162, sh: 14 },
   ball: { sx: 32, sy: 32, sw: 16, sh: 16 },
   blocks: {
@@ -28,7 +30,7 @@ let ssImg = null;
 let ssLoaded = false;
 const ssCallbacks = [];
 
-function loadSpritesheet( cb ) {
+export function loadSpritesheet( cb ) {
   if ( ssLoaded ) { cb(); return; }
   ssCallbacks.push( cb );
   if ( ssImg ) return;
@@ -45,15 +47,15 @@ function loadSpritesheet( cb ) {
     ssCallbacks.forEach( f => f() );
   };
   rawImg.onerror = () => console.error( 'Failed to load spritesheet' );
-  rawImg.src = 'assets/spritesheet-breakout.png';
+  rawImg.src = spritesheetSrc.src;
 }
 
-function drawFrame( ctx, frame, x, y, w, h ) {
+export function drawFrame( ctx, frame, x, y, w, h ) {
   if ( !ssLoaded ) return;
   ctx.drawImage( ssImg, frame.sx, frame.sy, frame.sw, frame.sh, x, y, w, h );
 }
 
-function drawSprite( ctx, name, x, y, w, h ) {
+export function drawSprite( ctx, name, x, y, w, h ) {
   if ( !ssLoaded ) return;
   let sp;
   if ( name.startsWith( 'block_' ) ) {
