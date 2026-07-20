@@ -1,6 +1,6 @@
 # SPEC 09 — Snake (leaderboard real)
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** 05-asteroides (patrón de engine portado), 06-leaderboard-asteroides (tabla `scores` compartida), 07-tetris (registry genérico)
 > **Date:** 2026-07-20
 > **Objective:** Implementar el juego de Snake tradicional como componente canvas real (`components/games/snake/`), usando primitivas de canvas reskineadas en la paleta neón del sitio para la serpiente y los sprites reales de fruta del atlas provisto (`references/source-assets/snake-assets/`), integrarlo en `/juego/snake/jugar`, registrarlo en `components/games/registry.ts`, y conectar su leaderboard a la tabla `scores` compartida de Supabase.
@@ -133,26 +133,26 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `lib/games.ts` tiene la entrada `id: "snake"` (ya no existe `id: "serpentina"`) con `title`, `short`, `long` actualizados, `cover: "cover-snake"` y `hasRealBackend: true`.
-- [ ] `/juegos` muestra la tarjeta "SNAKE" con su cover correcto; click navega a `/juego/snake`.
-- [ ] `/juego/serpentina` (y `/juego/serpentina/jugar`) da 404; `/juego/snake` carga bien.
-- [ ] `/juego/snake/jugar` muestra, tras un estado de carga breve, un `<canvas>` 600×600 jugable con la serpiente (primitivas neón) y frutas reales del atlas (`fruits.png`) dibujadas en el grid.
-- [ ] Las 4 flechas cambian la dirección de movimiento; no se puede invertir 180° instantáneamente (ir a la izquierda mientras se mueve a la derecha no causa colisión consigo misma); ninguna tecla usada scrollea la página.
-- [ ] `P`/`Escape` pausan el juego real; el botón PAUSA del `player-hud` hace lo mismo; REANUDAR continúa exactamente donde quedó.
-- [ ] El `player-hud` externo muestra Jugador/Puntuación/Longitud/Nivel con los mismos valores reales que el HUD interno del canvas, actualizados en tiempo real.
-- [ ] Comer una fruta suma exactamente 10 puntos, alarga la serpiente en 1 segmento, y hace aparecer una fruta nueva en una celda libre del grid con un sprite elegido al azar del atlas.
-- [ ] Cada 5 frutas comidas, el intervalo de movimiento baja ~5% (la serpiente se mueve visiblemente más rápido) y "Nivel" sube en ambos HUD.
-- [ ] Chocar contra cualquier borde del grid dispara game over inmediato, sin necesidad de pulsar FIN.
-- [ ] Chocar contra el propio cuerpo dispara game over inmediato, sin necesidad de pulsar FIN.
-- [ ] Pulsar FIN fuerza game over inmediato y abre el modal con la puntuación actual.
-- [ ] Guardar la puntuación en el modal inserta una fila real en la tabla `scores` de Supabase (`game_id: "snake"`, `player_name`, `score`, `user_id: null`) — verificable con `execute_sql`.
-- [ ] JUGAR DE NUEVO reinicia el engine real por completo (serpiente de 3 segmentos hacia la derecha, score 0, velocidad inicial) sin salir de la pantalla.
-- [ ] SALIR navega de vuelta a `/juego/snake`.
-- [ ] `/juego/snake` y la tab "SNAKE" de `/salon` muestran el leaderboard real leído de Supabase, ordenado de mayor a menor, con estado vacío sin crash (0, 1 o 2 scores).
-- [ ] Asteroides, Tetris y Arkanoid siguen funcionando exactamente igual que antes de este spec (jugar, pausar, guardar, leaderboard) — cero regresión tras añadir la rama `isSnake` a `GamePlayer.tsx`.
-- [ ] Los demás 4 juegos decorativos (`gloton`, `invasores`, `ranaria`, `duelo-pixel`) siguen mostrando la simulación visual actual y `seededScores`, sin cambios.
-- [ ] `npm run build` compila el proyecto completo sin errores de tipos ni de build.
-- [ ] `npm run dev` levanta la app sin errores en consola del navegador ni del servidor al navegar `/juegos`, `/salon`, `/juego/snake`, `/juego/snake/jugar` y los demás `/juego/[id]`.
+- [x] `lib/games.ts` tiene la entrada `id: "snake"` (ya no existe `id: "serpentina"`) con `title`, `short`, `long` actualizados, `cover: "cover-snake"` y `hasRealBackend: true`.
+- [x] `/juegos` muestra la tarjeta "SNAKE" con su cover correcto; click navega a `/juego/snake`.
+- [x] `/juego/serpentina` (y `/juego/serpentina/jugar`) da 404; `/juego/snake` carga bien.
+- [x] `/juego/snake/jugar` muestra, tras un estado de carga breve, un `<canvas>` 600×600 jugable con la serpiente (primitivas neón) y frutas reales del atlas (`fruits.png`) dibujadas en el grid.
+- [x] Las 4 flechas cambian la dirección de movimiento; no se puede invertir 180° instantáneamente (ir a la izquierda mientras se mueve a la derecha no causa colisión consigo misma); ninguna tecla usada scrollea la página.
+- [x] `P`/`Escape` pausan el juego real; el botón PAUSA del `player-hud` hace lo mismo; REANUDAR continúa exactamente donde quedó.
+- [x] El `player-hud` externo muestra Jugador/Puntuación/Longitud/Nivel con los mismos valores reales que el HUD interno del canvas, actualizados en tiempo real.
+- [x] Comer una fruta suma exactamente 10 puntos, alarga la serpiente en 1 segmento, y hace aparecer una fruta nueva en una celda libre del grid con un sprite elegido al azar del atlas.
+- [x] Cada 5 frutas comidas, el intervalo de movimiento baja ~5% (la serpiente se mueve visiblemente más rápido) y "Nivel" sube en ambos HUD.
+- [x] Chocar contra cualquier borde del grid dispara game over inmediato, sin necesidad de pulsar FIN.
+- [x] Chocar contra el propio cuerpo dispara game over inmediato, sin necesidad de pulsar FIN.
+- [x] Pulsar FIN fuerza game over inmediato y abre el modal con la puntuación actual.
+- [x] Guardar la puntuación en el modal inserta una fila real en la tabla `scores` de Supabase (`game_id: "snake"`, `player_name`, `score`, `user_id: null`) — verificable con `execute_sql`.
+- [x] JUGAR DE NUEVO reinicia el engine real por completo (serpiente de 3 segmentos hacia la derecha, score 0, velocidad inicial) sin salir de la pantalla.
+- [x] SALIR navega de vuelta a `/juego/snake`.
+- [x] `/juego/snake` y la tab "SNAKE" de `/salon` muestran el leaderboard real leído de Supabase, ordenado de mayor a menor, con estado vacío sin crash (0, 1 o 2 scores).
+- [x] Asteroides, Tetris y Arkanoid siguen funcionando exactamente igual que antes de este spec (jugar, pausar, guardar, leaderboard) — cero regresión tras añadir la rama `isSnake` a `GamePlayer.tsx`.
+- [x] Los demás 4 juegos decorativos (`gloton`, `invasores`, `ranaria`, `duelo-pixel`) siguen mostrando la simulación visual actual y `seededScores`, sin cambios.
+- [x] `npm run build` compila el proyecto completo sin errores de tipos ni de build.
+- [x] `npm run dev` levanta la app sin errores en consola del navegador ni del servidor al navegar `/juegos`, `/salon`, `/juego/snake`, `/juego/snake/jugar` y los demás `/juego/[id]`.
 
 ## Decisions
 
