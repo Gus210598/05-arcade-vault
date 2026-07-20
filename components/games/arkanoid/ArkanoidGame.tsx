@@ -14,6 +14,7 @@ export interface ArkanoidGameHandle {
   resume(): void;
   forceGameOver(): void;
   restart(): void;
+  setMuted(muted: boolean): void;
 }
 
 export interface ArkanoidGameProps {
@@ -24,12 +25,16 @@ export interface ArkanoidGameProps {
   // para que quien monte el componente pueda mantener sincronizado su propio
   // botón PAUSA/REANUDAR. Tetris/Asteroids no lo necesitan y pueden omitirlo.
   onPauseChange?: (paused: boolean) => void;
+  initialMuted?: boolean;
 }
 
 const CONTROL_KEYS = new Set(["ArrowLeft", "ArrowRight"]);
 
 const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
-  function ArkanoidGame({ onStateChange, onGameOver, onPauseChange }, ref) {
+  function ArkanoidGame(
+    { onStateChange, onGameOver, onPauseChange, initialMuted },
+    ref,
+  ) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<ArkanoidEngine | null>(null);
     const phaseRef = useRef<Phase>("playing");
@@ -68,6 +73,9 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
         pausedRef.current = false;
         engineRef.current?.restart();
       },
+      setMuted(muted: boolean) {
+        engineRef.current?.setMuted(muted);
+      },
     }));
 
     useEffect(() => {
@@ -89,7 +97,7 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
       }, (paused) => {
         pausedRef.current = paused;
         onPauseChangeRef.current?.(paused);
-      });
+      }, initialMuted);
       engineRef.current = engine;
 
       // Coordenadas ya convertidas a espacio de canvas (800×600 interno);
@@ -159,6 +167,7 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
         engine.destroy();
         engineRef.current = null;
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- initialMuted solo se lee al construir el engine; cambios posteriores van por setMuted()
     }, []);
 
     return (

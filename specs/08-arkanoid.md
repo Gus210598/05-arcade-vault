@@ -1,6 +1,6 @@
 # SPEC 08 — Arkanoid (leaderboard real)
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** 05-asteroides (patrón de engine portado), 06-leaderboard-asteroides (tabla `scores` compartida), 07-tetris (registry genérico)
 > **Date:** 2026-07-20
 > **Objective:** Portar Arkanoid desde `references/started-games/04-arkanoid/game.js` a un componente canvas real (`components/games/arkanoid/`) con spritesheet y audio reales, 5 niveles fijos, controles de teclado + mouse (incluido el menú de salto de nivel en pausa), integrarlo en `/juego/arkanoid/jugar`, registrarlo en `components/games/registry.ts`, y conectar su leaderboard a la tabla `scores` compartida de Supabase.

@@ -20,6 +20,7 @@ import type { ArkanoidGameHandle } from "@/components/games/arkanoid/ArkanoidGam
 import type { ArkanoidState } from "@/components/games/arkanoid/engine";
 
 const TETRIS_THEME_KEY = "av_tetris_theme";
+const ARKANOID_MUTED_KEY = "av_arkanoid_muted";
 const THEME_OPTIONS = Object.values(THEMES);
 
 export default function GamePlayer({ game }: { game: Game }) {
@@ -70,6 +71,7 @@ export default function GamePlayer({ game }: { game: Game }) {
     won: false,
   });
   const arkanoidRef = useRef<ArkanoidGameHandle>(null);
+  const [arkanoidMuted, setArkanoidMuted] = useState(false);
 
   const displayScore = isAsteroids
     ? asteroidsState.score
@@ -112,6 +114,16 @@ export default function GamePlayer({ game }: { game: Game }) {
     setTetrisTheme(initial);
     tetrisRef.current?.setTheme(initial);
   }, [isTetris]);
+
+  // Mismo criterio que el tema de Tetris: retoma la preferencia de sonido
+  // guardada y la aplica al engine real antes del primer frame audible.
+  useEffect(() => {
+    if (!isArkanoid) return;
+    const stored = window.localStorage.getItem(ARKANOID_MUTED_KEY) === "true";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage no es legible en SSR; sync inicial inevitable, sin parpadeo (ver comentario del tema de Tetris)
+    setArkanoidMuted(stored);
+    arkanoidRef.current?.setMuted(stored);
+  }, [isArkanoid]);
 
   const endGame = () => {
     if (isAsteroids) asteroidsRef.current?.forceGameOver();
@@ -166,6 +178,15 @@ export default function GamePlayer({ game }: { game: Game }) {
     setTetrisTheme(id);
     tetrisRef.current?.setTheme(id);
     window.localStorage.setItem(TETRIS_THEME_KEY, id);
+  };
+
+  const toggleMute = () => {
+    setArkanoidMuted((m) => {
+      const next = !m;
+      arkanoidRef.current?.setMuted(next);
+      window.localStorage.setItem(ARKANOID_MUTED_KEY, String(next));
+      return next;
+    });
   };
 
   return (
@@ -234,6 +255,15 @@ export default function GamePlayer({ game }: { game: Game }) {
           >
             SALIR
           </button>
+          {isArkanoid && (
+            <button
+              className="btn ghost"
+              aria-pressed={arkanoidMuted}
+              onClick={toggleMute}
+            >
+              {arkanoidMuted ? "SONIDO" : "SILENCIAR"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -251,7 +281,9 @@ export default function GamePlayer({ game }: { game: Game }) {
               }
               onGameOver={() => setOver(true)}
               {...(isTetris ? { initialTheme: tetrisTheme } : {})}
-              {...(isArkanoid ? { onPauseChange: setPaused } : {})}
+              {...(isArkanoid
+                ? { onPauseChange: setPaused, initialMuted: arkanoidMuted }
+                : {})}
             />
           ) : (
             <div className="game-arena">

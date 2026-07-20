@@ -190,24 +190,35 @@ export class ArkanoidEngine {
   private phase: Phase = "playing";
   private won = false;
   private isPaused = false;
+  // Mientras es false la pelota queda pegada a la barra (sigue su x, sin
+  // física propia) y el nivel no avanza; se activa al lanzar con flecha o
+  // clic (ver launch()). Se reinicia a false en cada resetBall().
+  private launched = false;
   private keys = { ArrowLeft: false, ArrowRight: false };
   private lastNotified: ArkanoidState | null = null;
 
   private bounceSound: HTMLAudioElement;
   private breakSound: HTMLAudioElement;
   private onPauseChange?: (paused: boolean) => void;
+  private muted: boolean;
 
   constructor(
     ctx: CanvasRenderingContext2D,
     onStateChange: (state: ArkanoidState) => void,
     onPauseChange?: (paused: boolean) => void,
+    initialMuted = false,
   ) {
     this.ctx = ctx;
     this.onStateChange = onStateChange;
     this.onPauseChange = onPauseChange;
+    this.muted = initialMuted;
     this.bounceSound = new Audio(bounceSoundSrc);
     this.breakSound = new Audio(breakSoundSrc);
     this.restart();
+  }
+
+  setMuted(muted: boolean) {
+    this.muted = muted;
   }
 
   // El menú de salto de nivel en pausa despausa el motor directamente (igual
@@ -231,10 +242,16 @@ export class ArkanoidEngine {
   }
 
   private resetBall(speedMultiplier: number) {
+    this.launched = false;
     this.ball.x = this.paddle.x + (this.paddle.w - this.ball.w) / 2;
     this.ball.y = this.paddle.y - this.ball.h;
     this.ball.vx = BASE_BALL_VX * speedMultiplier;
     this.ball.vy = BASE_BALL_VY * speedMultiplier;
+  }
+
+  private launch() {
+    if (this.launched || this.phase !== "playing" || this.isPaused) return;
+    this.launched = true;
   }
 
   private loadLevel(n: number) {
@@ -262,11 +279,13 @@ export class ArkanoidEngine {
   }
 
   private playBounce() {
+    if (this.muted) return;
     const clone = this.bounceSound.cloneNode() as HTMLAudioElement;
     void clone.play();
   }
 
   private playBreak() {
+    if (this.muted) return;
     const clone = this.breakSound.cloneNode() as HTMLAudioElement;
     void clone.play();
   }
@@ -294,8 +313,14 @@ export class ArkanoidEngine {
   }
 
   handleKeyDown(code: string) {
-    if (code === "ArrowLeft") this.keys.ArrowLeft = true;
-    if (code === "ArrowRight") this.keys.ArrowRight = true;
+    if (code === "ArrowLeft") {
+      this.keys.ArrowLeft = true;
+      this.launch();
+    }
+    if (code === "ArrowRight") {
+      this.keys.ArrowRight = true;
+      this.launch();
+    }
     if ((code === "KeyP" || code === "Escape") && this.phase === "playing") {
       this.setPaused(!this.isPaused);
     }
@@ -315,7 +340,10 @@ export class ArkanoidEngine {
   }
 
   handleClick(canvasX: number, canvasY: number) {
-    if (!this.isPaused) return;
+    if (!this.isPaused) {
+      this.launch();
+      return;
+    }
     for (let i = 0; i < 5; i++) {
       const bx = PAUSE_BTN_ROW_X + i * (PAUSE_BTN_W + PAUSE_BTN_GAP);
       if (
@@ -373,6 +401,17 @@ export class ArkanoidEngine {
         CANVAS_W - this.paddle.w,
         this.paddle.x + PADDLE_SPEED * dt,
       );
+
+    if (!this.launched) {
+      // Pelota pegada a la barra: sigue su x, sin física propia, hasta que
+      // launch() la suelte (flecha o clic, ver handleKeyDown/handleClick).
+      // El estado (lives/level/phase) ya se notificó en el frame de la
+      // transición (restart/resetBall), así que no hace falta notificar de
+      // nuevo aquí mientras se espera el lanzamiento.
+      this.ball.x = this.paddle.x + (this.paddle.w - this.ball.w) / 2;
+      this.ball.y = this.paddle.y - this.ball.h;
+      return;
+    }
 
     this.ball.x += this.ball.vx * dt;
     this.ball.y += this.ball.vy * dt;
@@ -544,6 +583,17 @@ export class ArkanoidEngine {
 
     if (this.phase === "gameover") {
       this.drawOverlay(this.won ? "¡COMPLETASTE EL JUEGO!" : "GAME OVER");
+    }
+    if (!this.launched && this.phase === "playing" && !this.isPaused) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+      ctx.font = "bold 14px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(
+        "◄ ► O CLIC PARA LANZAR",
+        CANVAS_W / 2,
+        this.paddle.y - 10,
+      );
     }
     if (this.isPaused) this.drawPauseOverlay();
   }
