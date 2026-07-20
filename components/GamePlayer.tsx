@@ -18,6 +18,8 @@ import type { TetrisGameHandle } from "@/components/games/tetris/TetrisGame";
 import { THEMES, type TetrisState, type ThemeId } from "@/components/games/tetris/engine";
 import type { ArkanoidGameHandle } from "@/components/games/arkanoid/ArkanoidGame";
 import type { ArkanoidState } from "@/components/games/arkanoid/engine";
+import type { SnakeGameHandle } from "@/components/games/snake/SnakeGame";
+import type { SnakeState } from "@/components/games/snake/engine";
 
 const TETRIS_THEME_KEY = "av_tetris_theme";
 const ARKANOID_MUTED_KEY = "av_arkanoid_muted";
@@ -28,6 +30,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const isAsteroids = game.id === "asteroides";
   const isTetris = game.id === "tetris";
   const isArkanoid = game.id === "arkanoid";
+  const isSnake = game.id === "snake";
   const GameComponent = engineRegistry[game.id];
 
   const userJson = useSyncExternalStore(
@@ -73,13 +76,23 @@ export default function GamePlayer({ game }: { game: Game }) {
   const arkanoidRef = useRef<ArkanoidGameHandle>(null);
   const [arkanoidMuted, setArkanoidMuted] = useState(false);
 
+  const [snakeState, setSnakeState] = useState<SnakeState>({
+    score: 0,
+    length: 3,
+    level: 1,
+    phase: "playing",
+  });
+  const snakeRef = useRef<SnakeGameHandle>(null);
+
   const displayScore = isAsteroids
     ? asteroidsState.score
     : isTetris
       ? tetrisState.score
       : isArkanoid
         ? arkanoidState.score
-        : score;
+        : isSnake
+          ? snakeState.score
+          : score;
   const displayLives = isAsteroids
     ? asteroidsState.lives
     : isArkanoid
@@ -91,17 +104,19 @@ export default function GamePlayer({ game }: { game: Game }) {
       ? tetrisState.level
       : isArkanoid
         ? arkanoidState.level
-        : level;
+        : isSnake
+          ? snakeState.level
+          : level;
 
   const name = customName ?? storedUser?.name ?? "INVITADO";
 
   useEffect(() => {
-    if (isAsteroids || isTetris || isArkanoid || over || paused) return;
+    if (isAsteroids || isTetris || isArkanoid || isSnake || over || paused) return;
     const t = setInterval(() => {
       setScore((s) => s + Math.floor(10 + Math.random() * 90));
     }, 220);
     return () => clearInterval(t);
-  }, [isAsteroids, isTetris, isArkanoid, over, paused]);
+  }, [isAsteroids, isTetris, isArkanoid, isSnake, over, paused]);
 
   // Al montar Tetris, retoma el tema guardado y lo aplica al engine real antes
   // del primer frame (setTheme() se ejecuta en fase de efectos, antes de que
@@ -129,12 +144,14 @@ export default function GamePlayer({ game }: { game: Game }) {
     if (isAsteroids) asteroidsRef.current?.forceGameOver();
     else if (isTetris) tetrisRef.current?.forceGameOver();
     else if (isArkanoid) arkanoidRef.current?.forceGameOver();
+    else if (isSnake) snakeRef.current?.forceGameOver();
     else setOver(true);
   };
   const restart = () => {
     if (isAsteroids) asteroidsRef.current?.restart();
     else if (isTetris) tetrisRef.current?.restart();
     else if (isArkanoid) arkanoidRef.current?.restart();
+    else if (isSnake) snakeRef.current?.restart();
     else setScore(0);
     setPaused(false);
     setOver(false);
@@ -152,27 +169,30 @@ export default function GamePlayer({ game }: { game: Game }) {
       } else if (isArkanoid) {
         if (next) arkanoidRef.current?.pause();
         else arkanoidRef.current?.resume();
+      } else if (isSnake) {
+        if (next) snakeRef.current?.pause();
+        else snakeRef.current?.resume();
       }
       return next;
     });
-  }, [isAsteroids, isTetris, isArkanoid]);
+  }, [isAsteroids, isTetris, isArkanoid, isSnake]);
 
   // KeyP/Escape reusan el mismo togglePause() del botón PAUSA, para que el
   // label y el overlay "EN PAUSA" nunca queden desincronizados del engine
-  // real. Tetris solo pide "P" (spec 07); Arkanoid pide "P" y "Escape"
-  // (spec 08) — Asteroids no pide ninguno y se deja fuera, sin cambiarle
-  // comportamiento.
+  // real. Tetris solo pide "P" (spec 07); Arkanoid y Snake piden "P" y
+  // "Escape" (spec 08/09) — Asteroids no pide ninguno y se deja fuera, sin
+  // cambiarle comportamiento.
   useEffect(() => {
-    if (!isTetris && !isArkanoid) return;
+    if (!isTetris && !isArkanoid && !isSnake) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       const isPauseKey =
-        e.code === "KeyP" || (isArkanoid && e.code === "Escape");
+        e.code === "KeyP" || ((isArkanoid || isSnake) && e.code === "Escape");
       if (!isPauseKey || over) return;
       togglePause();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTetris, isArkanoid, over, togglePause]);
+  }, [isTetris, isArkanoid, isSnake, over, togglePause]);
 
   const handleThemeChange = (id: ThemeId) => {
     setTetrisTheme(id);
@@ -207,6 +227,11 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="hud-stat">
               <div className="l">Líneas</div>
               <div className="v">{tetrisState.lines}</div>
+            </div>
+          ) : isSnake ? (
+            <div className="hud-stat">
+              <div className="l">Longitud</div>
+              <div className="v">{snakeState.length}</div>
             </div>
           ) : (
             <div className="hud-stat lives">
@@ -271,13 +296,23 @@ export default function GamePlayer({ game }: { game: Game }) {
         <div className="crt-screen">
           {GameComponent ? (
             <GameComponent
-              ref={isAsteroids ? asteroidsRef : isTetris ? tetrisRef : arkanoidRef}
+              ref={
+                isAsteroids
+                  ? asteroidsRef
+                  : isTetris
+                    ? tetrisRef
+                    : isArkanoid
+                      ? arkanoidRef
+                      : snakeRef
+              }
               onStateChange={
                 isAsteroids
                   ? setAsteroidsState
                   : isTetris
                     ? setTetrisState
-                    : setArkanoidState
+                    : isArkanoid
+                      ? setArkanoidState
+                      : setSnakeState
               }
               onGameOver={() => setOver(true)}
               {...(isTetris ? { initialTheme: tetrisTheme } : {})}
@@ -294,7 +329,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="player-ship" />
             </div>
           )}
-          {paused && !isArkanoid && (
+          {paused && !isArkanoid && !isSnake && (
             <div
               className="crt-content"
               style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
