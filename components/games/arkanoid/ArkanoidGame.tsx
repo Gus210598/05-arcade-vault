@@ -19,12 +19,17 @@ export interface ArkanoidGameHandle {
 export interface ArkanoidGameProps {
   onStateChange: (state: ArkanoidState) => void;
   onGameOver: (finalScore: number) => void;
+  // El menú de salto de nivel en pausa despausa el motor por su cuenta (ver
+  // Convenciones del spec); este callback opcional avisa cuando eso pasa,
+  // para que quien monte el componente pueda mantener sincronizado su propio
+  // botón PAUSA/REANUDAR. Tetris/Asteroids no lo necesitan y pueden omitirlo.
+  onPauseChange?: (paused: boolean) => void;
 }
 
 const CONTROL_KEYS = new Set(["ArrowLeft", "ArrowRight"]);
 
 const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
-  function ArkanoidGame({ onStateChange, onGameOver }, ref) {
+  function ArkanoidGame({ onStateChange, onGameOver, onPauseChange }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<ArkanoidEngine | null>(null);
     const phaseRef = useRef<Phase>("playing");
@@ -32,6 +37,7 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
     const prevPhaseRef = useRef<Phase>("playing");
     const onStateChangeRef = useRef(onStateChange);
     const onGameOverRef = useRef(onGameOver);
+    const onPauseChangeRef = useRef(onPauseChange);
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
@@ -41,6 +47,10 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
     useEffect(() => {
       onGameOverRef.current = onGameOver;
     }, [onGameOver]);
+
+    useEffect(() => {
+      onPauseChangeRef.current = onPauseChange;
+    }, [onPauseChange]);
 
     useImperativeHandle(ref, () => ({
       pause() {
@@ -76,6 +86,9 @@ const ArkanoidGame = forwardRef<ArkanoidGameHandle, ArkanoidGameProps>(
           onGameOverRef.current(state.score);
         }
         prevPhaseRef.current = state.phase;
+      }, (paused) => {
+        pausedRef.current = paused;
+        onPauseChangeRef.current?.(paused);
       });
       engineRef.current = engine;
 

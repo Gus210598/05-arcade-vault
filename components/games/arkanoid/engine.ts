@@ -195,16 +195,29 @@ export class ArkanoidEngine {
 
   private bounceSound: HTMLAudioElement;
   private breakSound: HTMLAudioElement;
+  private onPauseChange?: (paused: boolean) => void;
 
   constructor(
     ctx: CanvasRenderingContext2D,
     onStateChange: (state: ArkanoidState) => void,
+    onPauseChange?: (paused: boolean) => void,
   ) {
     this.ctx = ctx;
     this.onStateChange = onStateChange;
+    this.onPauseChange = onPauseChange;
     this.bounceSound = new Audio(bounceSoundSrc);
     this.breakSound = new Audio(breakSoundSrc);
     this.restart();
+  }
+
+  // El menú de salto de nivel en pausa despausa el motor directamente (igual
+  // que el original), sin pasar por pause()/resume(); este callback avisa a
+  // quien monta el componente (GamePlayer.tsx) para que su propio estado de
+  // "paused" no quede desincronizado del engine real en ese camino.
+  private setPaused(value: boolean) {
+    if (this.isPaused === value) return;
+    this.isPaused = value;
+    this.onPauseChange?.(value);
   }
 
   load(): Promise<void> {
@@ -284,7 +297,7 @@ export class ArkanoidEngine {
     if (code === "ArrowLeft") this.keys.ArrowLeft = true;
     if (code === "ArrowRight") this.keys.ArrowRight = true;
     if ((code === "KeyP" || code === "Escape") && this.phase === "playing") {
-      this.isPaused = !this.isPaused;
+      this.setPaused(!this.isPaused);
     }
   }
 
@@ -312,7 +325,7 @@ export class ArkanoidEngine {
         canvasY <= PAUSE_BTN_Y + PAUSE_BTN_H
       ) {
         this.loadLevel(i + 1);
-        this.isPaused = false;
+        this.setPaused(false);
         this.notify();
         return;
       }

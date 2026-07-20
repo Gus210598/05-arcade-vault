@@ -11,14 +11,13 @@ import {
   type StoredUser,
 } from "@/lib/auth";
 import { saveScoreToSupabase } from "@/lib/scores-client";
-import AsteroidsGame, {
-  type AsteroidsGameHandle,
-} from "@/components/games/asteroids/AsteroidsGame";
+import { engineRegistry } from "@/components/games/registry";
+import type { AsteroidsGameHandle } from "@/components/games/asteroids/AsteroidsGame";
 import type { AsteroidsState } from "@/components/games/asteroids/engine";
-import TetrisGame, {
-  type TetrisGameHandle,
-} from "@/components/games/tetris/TetrisGame";
+import type { TetrisGameHandle } from "@/components/games/tetris/TetrisGame";
 import { THEMES, type TetrisState, type ThemeId } from "@/components/games/tetris/engine";
+import type { ArkanoidGameHandle } from "@/components/games/arkanoid/ArkanoidGame";
+import type { ArkanoidState } from "@/components/games/arkanoid/engine";
 
 const TETRIS_THEME_KEY = "av_tetris_theme";
 const THEME_OPTIONS = Object.values(THEMES);
@@ -27,6 +26,8 @@ export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
   const isAsteroids = game.id === "asteroides";
   const isTetris = game.id === "tetris";
+  const isArkanoid = game.id === "arkanoid";
+  const GameComponent = engineRegistry[game.id];
 
   const userJson = useSyncExternalStore(
     subscribeStoredUser,
@@ -61,27 +62,44 @@ export default function GamePlayer({ game }: { game: Game }) {
   const tetrisRef = useRef<TetrisGameHandle>(null);
   const [tetrisTheme, setTetrisTheme] = useState<ThemeId>("retro");
 
+  const [arkanoidState, setArkanoidState] = useState<ArkanoidState>({
+    score: 0,
+    lives: 3,
+    level: 1,
+    phase: "playing",
+    won: false,
+  });
+  const arkanoidRef = useRef<ArkanoidGameHandle>(null);
+
   const displayScore = isAsteroids
     ? asteroidsState.score
     : isTetris
       ? tetrisState.score
-      : score;
-  const displayLives = isAsteroids ? asteroidsState.lives : lives;
+      : isArkanoid
+        ? arkanoidState.score
+        : score;
+  const displayLives = isAsteroids
+    ? asteroidsState.lives
+    : isArkanoid
+      ? arkanoidState.lives
+      : lives;
   const displayLevel = isAsteroids
     ? asteroidsState.level
     : isTetris
       ? tetrisState.level
-      : level;
+      : isArkanoid
+        ? arkanoidState.level
+        : level;
 
   const name = customName ?? storedUser?.name ?? "INVITADO";
 
   useEffect(() => {
-    if (isAsteroids || isTetris || over || paused) return;
+    if (isAsteroids || isTetris || isArkanoid || over || paused) return;
     const t = setInterval(() => {
       setScore((s) => s + Math.floor(10 + Math.random() * 90));
     }, 220);
     return () => clearInterval(t);
-  }, [isAsteroids, isTetris, over, paused]);
+  }, [isAsteroids, isTetris, isArkanoid, over, paused]);
 
   // Al montar Tetris, retoma el tema guardado y lo aplica al engine real antes
   // del primer frame (setTheme() se ejecuta en fase de efectos, antes de que
@@ -98,11 +116,13 @@ export default function GamePlayer({ game }: { game: Game }) {
   const endGame = () => {
     if (isAsteroids) asteroidsRef.current?.forceGameOver();
     else if (isTetris) tetrisRef.current?.forceGameOver();
+    else if (isArkanoid) arkanoidRef.current?.forceGameOver();
     else setOver(true);
   };
   const restart = () => {
     if (isAsteroids) asteroidsRef.current?.restart();
     else if (isTetris) tetrisRef.current?.restart();
+    else if (isArkanoid) arkanoidRef.current?.restart();
     else setScore(0);
     setPaused(false);
     setOver(false);
@@ -117,22 +137,30 @@ export default function GamePlayer({ game }: { game: Game }) {
       } else if (isTetris) {
         if (next) tetrisRef.current?.pause();
         else tetrisRef.current?.resume();
+      } else if (isArkanoid) {
+        if (next) arkanoidRef.current?.pause();
+        else arkanoidRef.current?.resume();
       }
       return next;
     });
-  }, [isAsteroids, isTetris]);
+  }, [isAsteroids, isTetris, isArkanoid]);
 
-  // KeyP reusa el mismo togglePause() del botón PAUSA, para que el label y el
-  // overlay "EN PAUSA" nunca queden desincronizados del engine real.
+  // KeyP/Escape reusan el mismo togglePause() del botón PAUSA, para que el
+  // label y el overlay "EN PAUSA" nunca queden desincronizados del engine
+  // real. Tetris solo pide "P" (spec 07); Arkanoid pide "P" y "Escape"
+  // (spec 08) — Asteroids no pide ninguno y se deja fuera, sin cambiarle
+  // comportamiento.
   useEffect(() => {
-    if (!isTetris) return;
+    if (!isTetris && !isArkanoid) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== "KeyP" || over) return;
+      const isPauseKey =
+        e.code === "KeyP" || (isArkanoid && e.code === "Escape");
+      if (!isPauseKey || over) return;
       togglePause();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isTetris, over, togglePause]);
+  }, [isTetris, isArkanoid, over, togglePause]);
 
   const handleThemeChange = (id: ThemeId) => {
     setTetrisTheme(id);
@@ -211,18 +239,19 @@ export default function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {isAsteroids ? (
-            <AsteroidsGame
-              ref={asteroidsRef}
-              onStateChange={setAsteroidsState}
+          {GameComponent ? (
+            <GameComponent
+              ref={isAsteroids ? asteroidsRef : isTetris ? tetrisRef : arkanoidRef}
+              onStateChange={
+                isAsteroids
+                  ? setAsteroidsState
+                  : isTetris
+                    ? setTetrisState
+                    : setArkanoidState
+              }
               onGameOver={() => setOver(true)}
-            />
-          ) : isTetris ? (
-            <TetrisGame
-              ref={tetrisRef}
-              onStateChange={setTetrisState}
-              onGameOver={() => setOver(true)}
-              initialTheme={tetrisTheme}
+              {...(isTetris ? { initialTheme: tetrisTheme } : {})}
+              {...(isArkanoid ? { onPauseChange: setPaused } : {})}
             />
           ) : (
             <div className="game-arena">
@@ -233,7 +262,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="player-ship" />
             </div>
           )}
-          {paused && (
+          {paused && !isArkanoid && (
             <div
               className="crt-content"
               style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
