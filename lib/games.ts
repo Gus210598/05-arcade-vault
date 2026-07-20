@@ -13,15 +13,16 @@ export interface Game {
 
 export const GAMES: Game[] = [
   {
-    id: "bloque-buster",
-    title: "BLOQUE BUSTER",
+    id: "arkanoid",
+    title: "ARKANOID",
     short: "Rebota la pelota y destruye muros de neón.",
-    long: "Pilota una nave-paleta y rebota un núcleo de plasma para pulverizar muros de bloques cromáticos. Cada nivel reorganiza la grilla en patrones imposibles. ¿Hasta dónde llegará tu racha?",
+    long: "Pilota una nave-paleta y rebota un núcleo de plasma para pulverizar muros de bloques cromáticos a lo largo de 5 niveles fijos. Usa teclado o mouse y salta de nivel desde el menú de pausa. ¿Hasta dónde llegará tu racha?",
     cat: "ARCADE",
-    cover: "cover-bricks",
+    cover: "cover-arkanoid",
     color: "cyan",
     best: 28450,
     plays: "12.4K",
+    hasRealBackend: true,
   },
   {
     id: "tetris",
@@ -107,9 +108,24 @@ export const GAMES: Game[] = [
 export const CATS = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"] as const;
 
 export const PLAYERS: string[] = [
-  "PX_KAI", "NEONFOX", "Z3R0COOL", "M00NRYU", "VAULT_07", "GLITCHA",
-  "ATARI_KID", "CYBER_LU", "MAGENTA88", "SCANLINE", "BIT_LORD", "ARKADYA",
-  "DROID_X", "RGB_QUEEN", "PIXEL_DAD", "RETROVIRA", "VECTORX", "JOY_STK",
+  "PX_KAI",
+  "NEONFOX",
+  "Z3R0COOL",
+  "M00NRYU",
+  "VAULT_07",
+  "GLITCHA",
+  "ATARI_KID",
+  "CYBER_LU",
+  "MAGENTA88",
+  "SCANLINE",
+  "BIT_LORD",
+  "ARKADYA",
+  "DROID_X",
+  "RGB_QUEEN",
+  "PIXEL_DAD",
+  "RETROVIRA",
+  "VECTORX",
+  "JOY_STK",
 ];
 
 export interface ScoreRow {
@@ -134,7 +150,14 @@ export function seededScores(seed: number, count = 12): ScoreRow[] {
     const score = base - i * Math.floor(2000 + rand() * 4000);
     const day = String(1 + Math.floor(rand() * 28)).padStart(2, "0");
     const mon = String(1 + Math.floor(rand() * 12)).padStart(2, "0");
-    rows.push({ rank: i + 1, name, score: Math.max(score, 1000), date: `${day}/${mon}/2026` });
+    rows.push({
+      rank: i + 1,
+      name,
+      score: Math.max(score, 1000),
+      date: `${day}/${mon}/2026`,
+    });
   }
-  return rows.sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
+  return rows
+    .sort((a, b) => b.score - a.score)
+    .map((r, i) => ({ ...r, rank: i + 1 }));
 }

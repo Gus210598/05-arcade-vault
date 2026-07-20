@@ -1,6 +1,6 @@
 # SPEC 07 — Tetris (leaderboard real)
 
-> **Status:** Aprobado
+> **Status:** Finalizado
 > **Depends on:** 05-asteroides (patrón de engine portado), 06-leaderboard-asteroides (tabla `scores` compartida)
 > **Date:** 2026-07-18
 > **Objective:** Portar Tetris desde `references/started-games/03-tetris/game.js` a un componente canvas real (`components/games/tetris/`), integrarlo en `/juego/tetris/jugar` con next-piece preview y ghost piece, introducir el registry genérico (`hasRealBackend` + `components/games/registry.ts`) que reemplaza los 4 puntos hoy hardcodeados a `"asteroides"`, y conectar su leaderboard real a la tabla `scores` compartida de Supabase.

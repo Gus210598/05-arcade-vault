@@ -396,10 +396,10 @@ a { color: inherit; text-decoration: none; }
 /* ===== Cover art generators (pure CSS) ===== */
 .cover-bg { position: absolute; inset: 0; }
 
-.cover-bricks { background:
+.cover-arkanoid { background:
   repeating-linear-gradient(90deg, #ff006e 0 32px, #ffae00 32px 64px, #00f5ff 64px 96px, #00ff88 96px 128px) 0 0/100% 32px,
   #15151f; }
-.cover-bricks::after {
+.cover-arkanoid::after {
   content: ""; position: absolute; inset: 0;
   background: repeating-linear-gradient(0deg, transparent 0 32px, rgba(0,0,0,0.4) 32px 33px);
 }
