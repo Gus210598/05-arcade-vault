@@ -8,4 +8,5 @@ export const engineRegistry: Record<string, ComponentType<any>> = {
   asteroides: dynamic(() => import("@/components/games/asteroids/AsteroidsGame")),
   tetris: dynamic(() => import("@/components/games/tetris/TetrisGame")),
   arkanoid: dynamic(() => import("@/components/games/arkanoid/ArkanoidGame")),
+  snake: dynamic(() => import("@/components/games/snake/SnakeGame")),
 };
